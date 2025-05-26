@@ -18,7 +18,7 @@
     // Docsify 설정
     window.$docsify = {
       name: 'C 러너 플러그인',
-      repo: '',
+      repo: 'YangSiJun528/docsify-c-runner-plugin',
       homepage: './docs/home.md',
       loadSidebar: './docs/_sidebar.md',
       subMaxLevel: 2,
@@ -26,11 +26,22 @@
       alias: {
         '/.*/_sidebar.md': './docs/_sidebar.md'
       },
-      basePath: '/'
+      basePath: '/',
+      
+      // 검색 기능 설정
+      search: {
+        paths: 'auto', // 자동으로 모든 페이지를 검색 대상으로 설정
+        placeholder: '검색어를 입력하세요',
+        noData: '검색 결과가 없습니다',
+        depth: 3, // 제목 깊이 (h1, h2, h3까지)
+        maxAge: 86400000, // 캐시 만료 시간 (1일)
+      }
     };
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <!-- 검색 플러그인 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
   <!-- 코드 하이라이팅 -->
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-c.min.js"></script>
   
