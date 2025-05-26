@@ -1,3 +1,4 @@
+
 # docsify-c-runner-plugin
 
 ## 소개
@@ -16,7 +17,7 @@ Docsify C Runner Plugin은 문서를 읽으면서 C 코드 예제를 즉시 실�
 
 ## 실행 영상
 
-TODO: 추가하기
+https://github.com/user-attachments/assets/f187a3b0-8b15-497e-a19b-11f0d116c33d
 
 ---
 
@@ -25,7 +26,7 @@ TODO: 추가하기
 이 프로젝트는 Docsify 환경에서 C Runner 플러그인을 함께 사용하도록 구성된 샘플 리포지토리입니다. 다음 요소가 필요합니다:
 
 * **Docsify**: 정적 사이트 생성 도구
-    * 이미 예시 프로젝트에 적용되어 있으므로 이 프로젝트를 clone하여 사용한다면 따로 구성할 필요 없습니다.
+    * 이 프로젝트를 clone하여 사용한다면 따로 구성할 필요 없습니다. 예제 프로젝트에 적용되어 있습니다.
 * **C Runner API 서버**: C 코드를 컴파일·실행할 수 있는 백엔드
     * 서버로는 [c-runner-api-server](https://github.com/YangSiJun528/c-runner-api-server)를 사용합니다. 다른 서버를 사용하려면 코드 수정이 필요합니다. (아래 설명 참고)
 * **웹 서버**: Docsify 문서를 서빙할 로컬/원격 서버
