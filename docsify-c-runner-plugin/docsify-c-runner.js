@@ -38,6 +38,7 @@
      * C 코드 실행 요청
      * @param {string} code 실행할 C 코드
      * @returns {Promise<Object>} 실행 결과
+     */
     async executeCode(code) {
       try {
         const controller = new AbortController();
