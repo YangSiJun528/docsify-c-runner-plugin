@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Docsify C 러너 플러그인</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Docsify C 러너 플러그인 예제">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="./docsify-c-runner-plugin/docsify-c-runner.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    // 플러그인 설정 로드
+    document.write('<script src="docsify-c-runner-plugin/config.js"><\/script>');
+    
+    // Docsify 설정
+    window.$docsify = {
+      name: 'C 러너 플러그인',
+      repo: '',
+      homepage: './docs/home.md',
+      loadSidebar: './docs/_sidebar.md',
+      subMaxLevel: 2,
+      auto2top: true,
+      alias: {
+        '/.*/_sidebar.md': './docs/_sidebar.md'
+      },
+      basePath: '/'
+    };
+  </script>
+  <!-- Docsify v4 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <!-- 코드 하이라이팅 -->
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-c.min.js"></script>
+  
+  <!-- C 러너 플러그인 -->
+  <script src="./docsify-c-runner-plugin/docsify-c-runner.js"></script>
+</body>
+</html>
