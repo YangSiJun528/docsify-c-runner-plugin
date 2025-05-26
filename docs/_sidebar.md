@@ -1,2 +1,2 @@
-* [홈](/docs/home.md)
-* [예제](/docs/examples.md)
+* [홈](home.md)
+* [예제](examples.md)
