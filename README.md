@@ -15,6 +15,7 @@ Docsify C Runner Plugin은 문서를 읽으면서 C 코드 예제를 즉시 실�
 ## 주요 기능
 
 - **실시간 C 코드 실행**: 문서 내 C 코드 블록을 브라우저에서 바로 실행
+- **커맨드라인 인자 지원**: 코드 실행 시 커맨드라인 인자 입력 가능
 - **코드 결과 출력**: 실행 결과와 오류 메시지를 문서 내에서 직접 확인
 - **코드 복사**: 코드 클립보드 복사
 - **문법 하이라이팅**: C 코드 구문 강조 표시
@@ -138,10 +139,12 @@ npx http-server -p 3000
 
 ## 사용법
 
-마크다운 문서에서 C 코드 블록을 다음과 같이 작성하면 실행 버튼이 자동으로 추가됩니다:
+### 실행 가능한 코드 블록
+
+마크다운 문서에서 C 코드 블록을 다음과 같이 작성하면 실행 버튼이 자동으로 추가됩니다.
 
 ````markdown
-```c
+```c,runnable
 #include <stdio.h>
 
 int main() {
@@ -153,7 +156,52 @@ int main() {
 
 코드 블록 옆의 "Run" 버튼을 클릭하면 코드가 실행되고 결과가 표시됩니다.
 
-이 데모 프로젝트를 실행해서 더 자세한 사용법과 실제 사용 예를 볼 수 있습니다.
+### 코드 블록 하이라이트
+
+복잡하거나 긴 코드 중 핵심 부분만 강조하여 보여주고 싶을 때 사용합니다.
+
+강조할 시작 지점 위에 `// START_HIGHLIGHT` 을 추가합니다.
+강조할 끝 지점 아래에 `// END_HIGHLIGHT` 을 추가합니다.
+
+Docsify에서 문서를 볼 떄는 `// START_HIGHLIGHT`, `// END_HIGHLIGHT`의 코드 라인은 제거됩니다. 
+
+````markdown
+```c,runnable
+#include <stdio.h>
+
+int main() {
+    // START_HIGHLIGHT
+    printf("이 부분만 처음에 보입니다!\n");
+    // END_HIGHLIGHT
+    
+    printf("전체 코드를 보려면 토글 버튼을 클릭하세요.\n");
+    return 0;
+}
+```
+````
+
+### 커맨드라인 인자 지원
+
+커맨드라인 인자를 입력받아 실행하려면 다음과 같이 `c,runnable,args` 옵션을 사용합니다.
+
+````markdown
+```c,runnable,args
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+    printf("인자 개수: %d\n", argc);
+    
+    for (int i = 0; i < argc; i++) {
+        printf("인자 %d: %s\n", i, argv[i]);
+    }
+    
+    return 0;
+}
+```
+````
+
+"Run" 버튼을 클릭하면 커맨드라인 인자를 입력할 수 있는 프롬프트가 표시됩니다.   
+인자를 입력하고 확인하면 코드가 실행됩니다.
 
 ## 문제 해결
 
