@@ -7,7 +7,7 @@ window.$docsifyCRunnerConfig = {
   // API 서버 설정
   apiServer: {
     // C 코드 실행 API 서버 URL
-    url: 'http://localhost:5555/execute_c',
+    url: 'https://funny-druci-yangsijun528-fa509f58.koyeb.app/execute_c',
     
     // API 요청 헤더
     headers: {
