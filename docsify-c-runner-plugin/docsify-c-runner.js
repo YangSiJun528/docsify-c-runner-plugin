@@ -37,9 +37,10 @@
     /**
      * C 코드 실행 요청
      * @param {string} code 실행할 C 코드
+     * @param {string} args 명령행 인수 (선택사항)
      * @returns {Promise<Object>} 실행 결과
      */
-    async executeCode(code) {
+    async executeCode(code, args = '') {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -47,7 +48,10 @@
         const response = await fetch(this.url, {
           method: 'POST',
           headers: this.headers,
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ 
+            code: code,
+            args: args 
+          }),
           signal: controller.signal
         });
         
@@ -222,12 +226,14 @@
      * @param {string} language 언어 (c)
      * @param {Object} markerHandler 코드 마커 처리기
      * @param {Object} apiClient C API 클라이언트
+     * @param {boolean} hasArgsOption 커맨드라인 인자 옵션 여부
      * @returns {HTMLElement} 생성된 코드 블록 컨테이너
      */
-    createCodeBlockContainer(codeContent, language, markerHandler, apiClient) {
+    createCodeBlockContainer(codeContent, language, markerHandler, apiClient, hasArgsOption) {
       const container = document.createElement('div');
       container.className = 'c-runner-container';
       container.dataset.expanded = 'false';
+      container.dataset.hasArgs = hasArgsOption ? 'true' : 'false';
       
       // 코드 마커 처리
       const codeInfo = markerHandler.extractMarkedCode(codeContent);
@@ -247,7 +253,7 @@
       container.appendChild(codeBlock);
       
       // 버튼 컨테이너 생성
-      const buttonContainer = this.createButtonContainer(container, codeElement, fullCode, cleanCode, initialCode, codeInfo, markerHandler, apiClient);
+      const buttonContainer = this.createButtonContainer(container, codeElement, fullCode, cleanCode, initialCode, codeInfo, markerHandler, apiClient, hasArgsOption);
       container.appendChild(buttonContainer);
       
       // 결과 컨테이너 생성
@@ -277,9 +283,10 @@
      * @param {Object} codeInfo 코드 정보
      * @param {Object} markerHandler 코드 마커 처리기
      * @param {Object} apiClient C API 클라이언트
+     * @param {boolean} hasArgsOption 커맨드라인 인자 옵션 여부
      * @returns {HTMLElement} 생성된 버튼 컨테이너
      */
-    createButtonContainer(container, codeElement, fullCode, cleanCode, initialCode, codeInfo, markerHandler, apiClient) {
+    createButtonContainer(container, codeElement, fullCode, cleanCode, initialCode, codeInfo, markerHandler, apiClient, hasArgsOption) {
       const buttonContainer = document.createElement('div');
       buttonContainer.className = 'c-runner-buttons';
       
@@ -289,7 +296,16 @@
       runButton.innerHTML = '<span class="c-runner-icon">▶</span>';
       runButton.title = 'Run Code';
       runButton.onclick = async () => {
-        await this.runCode(container, cleanCode, apiClient);
+        let args = '';
+        
+        // 커맨드라인 인자 옵션이 있는 경우 프롬프트로 입력 받기
+        if (hasArgsOption) {
+          args = prompt('커맨드라인 인자를 입력하세요:', '');
+          // 취소 버튼 클릭 시 실행 중단
+          if (args === null) return;
+        }
+        
+        await this.runCode(container, cleanCode, apiClient, args);
       };
       
       // 토글 버튼 (코드 숨김/표시)
@@ -343,8 +359,9 @@
      * @param {HTMLElement} container 코드 블록 컨테이너
      * @param {string} code 실행할 코드
      * @param {Object} apiClient C API 클라이언트
+     * @param {string} args 명령행 인수 (선택사항)
      */
-    async runCode(container, code, apiClient) {
+    async runCode(container, code, apiClient, args = '') {
       const resultContainer = container.querySelector('.c-runner-result');
       
       // 로딩 표시
@@ -353,7 +370,7 @@
       
       try {
         // API 요청
-        const result = await apiClient.executeCode(code);
+        const result = await apiClient.executeCode(code, args);
         const formattedResult = apiClient.formatResult(result);
         
         // 결과 표시
@@ -542,86 +559,33 @@
       next(html);
     });
     
-    // DOM 준비 후 코드 블록 변환
+    // DOM 준비 후
     hook.doneEach(function() {
-      // c,runnable 코드 블록 찾기 (class 기반 selector로 변경)
-      const codeBlocks = Array.from(document.querySelectorAll('code.lang-c\\.runnable, code.lang-c\\,runnable'));
+      // 코드 블록 처리
+      const preElements = document.querySelectorAll('pre[data-lang]');
       
-      if (codeBlocks.length === 0) {
-        console.log('Docsify C Runner: 실행 가능한 C 코드 블록을 찾을 수 없습니다. 다른 selector 시도 중...');
+      preElements.forEach(preElement => {
+        const codeElement = preElement.querySelector('code');
+        if (!codeElement) return;
         
-        // 대체 selector 시도
-        const altCodeBlocks = Array.from(document.querySelectorAll('pre code[class*="lang-c"]'));
+        const lang = preElement.getAttribute('data-lang');
+        const isRunnable = lang.includes('c,runnable');
+        const hasArgsOption = lang.includes('c,runnable,args');
         
-        altCodeBlocks.forEach(codeBlock => {
-          if (codeBlock.className.includes('runnable')) {
-            processCodeBlock(codeBlock);
-          }
-        });
-      } else {
-        codeBlocks.forEach(codeBlock => {
-          processCodeBlock(codeBlock);
-        });
-      }
-      
-      // 추가 시도: 모든 pre 요소 검사
-      if (codeBlocks.length === 0) {
-        const allPreBlocks = Array.from(document.querySelectorAll('pre'));
-        allPreBlocks.forEach(preBlock => {
-          const codeElement = preBlock.querySelector('code');
-          if (codeElement && 
-              (preBlock.getAttribute('data-lang') === 'c,runnable' || 
-               codeElement.className.includes('c') && codeElement.className.includes('runnable'))) {
-            processCodeBlock(codeElement);
-          }
-        });
-      }
-    });
-    
-    // 코드 블록 처리 함수
-    function processCodeBlock(codeBlock) {
-      const preElement = codeBlock.parentElement;
-      const codeContent = codeBlock.textContent;
-      
-      console.log('Docsify C Runner: 코드 블록 처리 중...', codeBlock);
-      
-      // 코드 블록 UI 생성
-      const container = plugin.codeBlockUI.createCodeBlockContainer(
-        codeContent,
-        'c',
-        plugin.markerHandler,
-        plugin.apiClient
-      );
-      
-      // 기존 코드 블록 대체
-      preElement.parentElement.replaceChild(container, preElement);
-    }
-    
-    // 모든 콘텐츠 로드 후 추가 검사
-    hook.ready(function() {
-      // TODO: 이거 없어도 될 듯? 그냥 오류 띄우는게 맞을지도
-      // 사이드바 오류 처리
-      if (window.$docsify.loadSidebar && !document.querySelector('aside.sidebar')) {
-        console.log('Docsify C Runner: 사이드바 설정이 있지만 _sidebar.md 파일이 없습니다. 사이드바 비활성화 중...');
-        window.$docsify.loadSidebar = false;
-        
-        // 사이드바 관련 오류 메시지 제거
-        const app = document.querySelector('#app');
-        if (app) {
-          app.innerHTML = app.innerHTML.replace(/Failed to load sidebar/g, '');
+        if (isRunnable) {
+          const codeContent = codeElement.textContent;
+          const container = plugin.codeBlockUI.createCodeBlockContainer(
+            codeContent, 
+            'c', 
+            plugin.markerHandler, 
+            plugin.apiClient,
+            hasArgsOption
+          );
+          
+          // 기존 코드 블록 대체
+          preElement.parentNode.replaceChild(container, preElement);
         }
-      }
-      
-      // 지연 실행으로 코드 블록 한 번 더 검사
-      setTimeout(() => {
-        const codeBlocks = Array.from(document.querySelectorAll('code.lang-c\\.runnable, code.lang-c\\,runnable, code[class*="lang-c"][class*="runnable"]'));
-        codeBlocks.forEach(codeBlock => {
-          // 이미 처리된 블록인지 확인
-          if (!codeBlock.closest('.c-runner-container')) {
-            processCodeBlock(codeBlock);
-          }
-        });
-      }, 1000);
+      });
     });
   }
 
@@ -629,4 +593,5 @@
   window.$docsify = window.$docsify || {};
   window.$docsify.plugins = window.$docsify.plugins || [];
   window.$docsify.plugins.push(docsifyCRunnerPlugin);
+
 })();
